@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="Angular.js"></script>
+    <title>Ramadan 2024 TimeTable and ToDo App</title>
+
+    <style>
+        table {
+          width: 80%; /* Adjust the width as needed */
+          margin: 0 auto; /* Center the table */
+          border-spacing: 2px; /* Spacing between cell borders */
+        }
+      
+        td {
+          padding: 10px; /* Padding inside each cell */
+          text-align: center; /* Center align text */
+          border: 1px solid 8dc8d8; /* Border for each cell */
+          color: white;
+          border-radius: 5px;
+        }
+                tr:nth-child(odd) {
+            background-color:  #6a994e; /* Light gray background for odd rows */
+        }
+        table{
+          border: #bc4749 2pt solid;
+          border-radius: 5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #a7c957; /* White background for even rows */
+        }
+        /* Button styles */
+        button {
+            padding: 8px 20px; /* Padding inside the button */
+            border: none; /* No border */
+            background-color: #bc4749; /* Green background color */
+            color: white; /* White text color */
+            border-radius: 10px; /* Rounded corners */
+            cursor: pointer; /* Cursor style */
+        }
+
+        button:hover {
+            background-color: #386641;
+            color: white; 
+            transform: scale(1.1);
+                  }
+        .todo {
+    margin: 0 auto; /* Center the todo section */
+    width: 50%; /* Set the width */
+    text-align: center; /* Center align text */
+}
+
+.todo input[type="text"] {
+    width: 55%; /* Adjust input width */
+    padding: 10px; /* Padding inside input */
+    margin-bottom: 10px; /* Spacing between input and button */
+    border-radius: 10px;
+}
+
+.todo button {
+    padding: 10px 20px; /* Padding inside button */
+    margin-left: 5px; /* Spacing between input and button */
+}
+
+body {
+    background-color: #f2e8cf; /* Pretty purple color */
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #f2f2f2; /* Background color for the footer */
+}
+
+footer p {
+    margin: 0;
+    font-size: 14px;
+}
+
+footer a {
+    color: #0077b5; /* LinkedIn blue color */
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+
+      </style>
+      
+
+</head>
+<body ng-controller="myCtrl">
+    <header style="text-align: center;align-items: center;">
+        <h1 style="font-family:Verdana, Geneva, Tahoma, sans-serif ; color: #bc4749;">Ramadan 2024 Planner and Timings</h1>
+        <br>
+        <h1 style="color: #386641; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ كُتِبَ عَلَيْكُمُ ٱلصِّيَامُ كَمَا كُتِبَ عَلَى ٱلَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ ١٨٣</h1>
+        <!-- <br> -->
+        <h2 style="color: #386641;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">O believers! Fasting is prescribed for you—as it was for those before you—so perhaps you will become mindful ˹of Allah˺.</h2>
+    </header>
+    <br><br>
+    <div class="todo" style="font-family:Verdana, Geneva, Tahoma, sans-serif ;">
+        <h1 style="color: #bc4749; font-weight: 900;font-family:Verdana, Geneva, Tahoma, sans-serif ;">To-Do List</h1>
+        <form ng-submit = "addTask()" style="color: #bc4749; font-size: large; font-weight: bold;">
+            Task : 
+            <input type="text" ng-model = "newTask" required>
+            <button type="submit">Add Task</button>
+        </form>
+        <br>
+        <table>
+            
+                <tr>
+                    <td>Task</td>
+                    <td>Action</td>
+                </tr>
+            
+            
+                <tr ng-repeat = "task in tasks">
+                    <td>{{ task }}</td>
+                    <td>
+                        <button ng-click = "editTask($index)">Edit</button>
+                        <button ng-click = "deleteTask($index)">Delete</button>
+                    
+                    </td>
+                </tr>
+            
+        </table>
+        <div ng-if = "editingTaskIndex !== null">
+            <h2>Edit Task</h2>
+            Task : <input type="text" ng-model = "tasks" required>
+            <br><button ng-click = "saveEdit()">Save</button>
+            <button ng-click = "cancelEdit()">Cancel</button>
+        
+        </div>
+    </div>
+    <script>
+        var app = angular.module('myApp',[]);
+        app.controller('myCtrl',function($scope){
+            // $scope.tasks = ['task1','task2','task3'];
+            // $scope.newTask = '';
+            // $scope.editingTaskIndex = null;
+            // $scope.addTask = function(){
+            //     $scope.tasks.push($scope.newTask);
+            //     $scope.newTask = '';
+            // };
+            // $scope.editTask = function(index){
+            //     var updatedTask = prompt('Enter updated task : ');
+            //     if(updatedTask !== null)
+            //     {
+            //         $scope.tasks.splice(index,1,updatedTask);
+            //     }
+            // };
+            // $scope.deleteTask = function(index){
+            //     $scope.tasks.splice(index,1);
+            // };
+
+             // Retrieve tasks from localStorage or set default if empty
+              $scope.tasks = JSON.parse(localStorage.getItem('tasks')) || ['task1','task2','task3'];
+              $scope.newTask = '';
+              $scope.editingTaskIndex = null;
+
+              $scope.addTask = function(){
+                  $scope.tasks.push($scope.newTask);
+                  $scope.newTask = '';
+                  updateLocalStorage(); // Update localStorage after adding task
+              };
+
+              $scope.editTask = function(index){
+                  var updatedTask = prompt('Enter updated task : ');
+                  if(updatedTask !== null)
+                  {
+                      $scope.tasks.splice(index,1,updatedTask);
+                      updateLocalStorage(); // Update localStorage after editing task
+                  }
+              };
+
+              $scope.deleteTask = function(index){
+                  $scope.tasks.splice(index,1);
+                  updateLocalStorage(); // Update localStorage after deleting task
+              };
+
+              // Save tasks to localStorage
+              function updateLocalStorage() {
+                  localStorage.setItem('tasks', JSON.stringify($scope.tasks));
+              }
+
+        });
+    </script>
+
+    <br><br>
+    <div class="timings" style="text-align: center; align-items: center; color: #bc4749;font-family:Verdana, Geneva, Tahoma, sans-serif ;">
+        <h1>Timings (India)</h1>
+        <table>
+                <td>Date</td>
+                <td>Deadline for sehri</td>	
+                <td>Iftar timings</td>
+            </tr>
+            
+                <tr>
+                  <td>12 March, 2024</td>
+                  <td>5:16 AM</td>
+                  <td>6:28 PM</td>
+                </tr>
+                <tr>
+                  <td>13 March, 2024</td>
+                  <td>5:15 AM</td>
+                  <td>6:29 PM</td>
+                </tr>
+                <tr>
+                  <td>14 March, 2024</td>
+                  <td>5:14 AM</td>
+                  <td>6:29 PM</td>
+                </tr>
+                <tr>
+                  <td>15 March, 2024</td>
+                  <td>5:13 AM</td>
+                  <td>6:30 PM</td>
+                </tr>
+                <tr>
+                  <td>16 March, 2024</td>
+                  <td>5:11 AM</td>
+                  <td>6:31 PM</td>
+                </tr>
+                <tr>
+                  <td>17 March, 2024</td>
+                  <td>5:10 AM</td>
+                  <td>6:31 PM</td>
+                </tr>
+                <tr>
+                  <td>18 March, 2024</td>
+                  <td>5:09 AM</td>
+                  <td>6:32 PM</td>
+                </tr>
+                <tr>
+                  <td>19 March, 2024</td>
+                  <td>5:08 AM</td>
+                  <td>6:32 PM</td>
+                </tr>
+                <tr>
+                  <td>20 March, 2024</td>
+                  <td>05:07 AM</td>
+                  <td>6:33 PM</td>
+                </tr>
+                <tr>
+                  <td>21 March, 2024</td>
+                  <td>05:05 AM</td>
+                  <td>6:33 PM</td>
+                </tr>
+                <tr>
+                  <td>22 March, 2024</td>
+                  <td>05:04 AM</td>
+                  <td>6:34 PM</td>
+                </tr>
+                <tr>
+                  <td>23 March, 2024</td>
+                  <td>05:03 AM</td>
+                  <td>6:34 PM</td>
+                </tr>
+                <tr>
+                  <td>24 March, 2024</td>
+                  <td>05:02 AM</td>
+                  <td>6:35 PM</td>
+                </tr>
+                <tr>
+                  <td>25 March, 2024</td>
+                  <td>05:00 AM</td>
+                  <td>6:36 PM</td>
+                </tr>
+                <tr>
+                  <td>26 March, 2024</td>
+                  <td>04:59 AM</td>
+                  <td>6:36 PM</td>
+                </tr>
+                <tr>
+                  <td>27 March, 2024</td>
+                  <td>04:58 AM</td>
+                  <td>6:37 PM</td>
+                </tr>
+                <tr>
+                  <td>28 March, 2024</td>
+                  <td>04:57 AM</td>
+                  <td>6:37 PM</td>
+                </tr>
+                <tr>
+                  <td>29 March, 2024</td>
+                  <td>04:55 AM</td>
+                  <td>6:38 PM</td>
+                </tr>
+                <tr>
+                  <td>30 March, 2024</td>
+                  <td>04:54 AM</td>
+                  <td>6:38 PM</td>
+                </tr>
+                <tr>
+                  <td>31 March, 2024</td>
+                  <td>04:53 AM</td>
+                  <td>6:39 PM</td>
+                </tr>
+                <tr>
+                  <td>1 April, 2024</td>
+                  <td>04:52 AM</td>
+                  <td>6:39 PM</td>
+                </tr>
+                <tr>
+                  <td>2 April, 2024</td>
+                  <td>04:50 AM</td>
+                  <td>6:40 PM</td>
+                </tr>
+                <tr>
+                  <td>3 April, 2024</td>
+                  <td>04:49 AM</td>
+                  <td>6:41 PM</td>
+                </tr>
+                <tr>
+                  <td>4 April, 2024</td>
+                  <td>04:48 AM</td>
+                  <td>6:41 PM</td>
+                </tr>
+                <tr>
+                  <td>5 April, 2024</td>
+                  <td>04:47 AM</td>
+                  <td>6:42 PM</td>
+                </tr>
+                <tr>
+                  <td>6 April, 2024</td>
+                  <td>04:45 AM</td>
+                  <td>6:42 PM</td>
+                </tr>
+                <tr>
+                  <td>7 April, 2024</td>
+                  <td>04:44 AM</td>
+                  <td>6:43 PM</td>
+                </tr>
+                <tr>
+                  <td>8 April, 2024</td>
+                  <td>04:43 AM</td>
+                  <td>6:43 PM</td>
+                </tr>
+                <tr>
+                  <td>9 April, 2024</td>
+                  <td>04:41 AM</td>
+                  <td>6:44 PM</td>
+                </tr>
+              </table>
+              
+        </table>
+    </div>
+    <footer>
+      <p>&copy; 2024 Wazeera Khan. All rights reserved. | <a href="https://www.linkedin.com/in/wazeera-khan?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">Connect with me on LinkedIn</a></p>
+  </footer>
+    
+</body>
+</html>
+
